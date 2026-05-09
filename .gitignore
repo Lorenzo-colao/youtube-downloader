@@ -6,3 +6,10 @@ venv/
 downloads/
 build/
 dist/
+venv/
+downloads/
+__pycache__/
+build/
+dist/
+*.spec
+Aucun dossier sélectionné/
