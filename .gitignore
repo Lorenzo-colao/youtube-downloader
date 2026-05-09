@@ -4,3 +4,5 @@ __pycache__/
 bin/
 venv/
 downloads/
+build/
+dist/
