@@ -1,15 +1,16 @@
 import tkinter as tk
+import threading
+import queue
 from tkinter import filedialog
 from backend.downloader import telecharger_mp3
 
+
 def lancer_app():
-    
-    
     root = tk.Tk()
     root.title("YouTube MP3 Downloader")
-    
+    download_queue = queue.Queue()
     largeur_fenetre = 400
-    hauteur_fenetre = 200
+    hauteur_fenetre = 320
     largeur_ecran = root.winfo_screenwidth()
     hauteur_ecran = root.winfo_screenheight()
     x = (largeur_ecran - largeur_fenetre) / 2
@@ -21,10 +22,22 @@ def lancer_app():
     dossier_var.set("Aucun dossier sélectionné")
     
     def on_click() : 
-        url = entry.get()
+        texte = text_urls.get("1.0", tk.END)
+        lignes = texte.splitlines()
+        for url in lignes :
+            download_queue.put(url)
+        
         dossier_utilisateur = dossier_var.get()
-        resultat = telecharger_mp3(url, dossier_utilisateur)
-        print(resultat)
+        
+    def worker():
+        while True:
+            url = download_queue.get()
+            resultat = telecharger_mp3(url, dossier_var.get())
+            download_queue.task_done()
+            
+    thread = threading.Thread(target=worker, daemon=True)
+    thread.start()
+        
         
     def choisir_dossier() :
         chemin_utilisateur = filedialog.askdirectory()
@@ -33,8 +46,8 @@ def lancer_app():
     
     label = tk.Label(root, text="Colle ton URL YouTube ici :")
     label.pack()
-    entry = tk.Entry(root, width=50)
-    entry.pack(pady=5)
+    text_urls = tk.Text(root, width=50, height=10)
+    text_urls.pack(pady=5)
     button = tk.Button(root, text="Télécharger", command=on_click)
     button.pack(pady=8)
     button_dossier = tk.Button(root, text="Choisir dossier", command=choisir_dossier)
